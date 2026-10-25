@@ -1,0 +1,12 @@
+{
+  "contract": 1,
+  "id": "forward",
+  "title": "端口转发",
+  "icon": "⇆",
+  "entry": "module.js",
+  "styles": ["style.css", "forward.css"],
+  "home": "/",
+  "nav": [
+    { "path": "/", "title": "转发规则", "icon": "⇆" }
+  ]
+}

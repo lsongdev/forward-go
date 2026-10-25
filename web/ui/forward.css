@@ -1,0 +1,7 @@
+/* Port forwarder styles; everything else comes from style.css. */
+.num, .table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.route { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.route .arrow { color: var(--muted); }
+.choices { display: flex; gap: 16px; flex-wrap: wrap; }
+.error-text { color: var(--danger); font-size: 12.5px; overflow-wrap: anywhere; }
+fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
