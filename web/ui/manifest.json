@@ -4,7 +4,7 @@
   "title": "Port Forwarding",
   "icon": "⇆",
   "entry": "module.js",
-  "styles": ["style.css", "forward.css"],
+  "styles": ["vendor/stylesheets.css", "style.css", "forward.css"],
   "home": "/",
   "nav": [
     { "path": "/", "title": "Rules", "icon": "⇆" }

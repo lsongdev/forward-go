@@ -1,6 +1,6 @@
 import { html, useState } from '../lib/html.js';
 import { useAction, useResource } from '../lib/hooks.js';
-import { Page, Notice, Loading, Empty, Status, Field, Modal, confirmDanger } from '../lib/ui.js';
+import { Page, Notice, Loading, Empty, Status, Field, Modal, confirmDanger, Table } from '../lib/ui.js';
 import { usePanel } from '../lib/panel.js';
 import { bytes } from '../lib/format.js';
 
@@ -9,8 +9,8 @@ const PROTOCOLS = { tcp: 'TCP', udp: 'UDP' };
 function State({ rule }) {
   const s = rule.stats;
   if (s.running) return html`<${Status} state="running" />`;
-  if (rule.enabled) return html`<${Status} state="failed" label="未运行" title=${s.error} />`;
-  return html`<${Status} state="stopped" label="已停用" />`;
+  if (rule.enabled) return html`<${Status} state="failed" label="Not running" title=${s.error} />`;
+  return html`<${Status} state="stopped" label="Disabled" />`;
 }
 
 export default function Rules() {
@@ -24,30 +24,30 @@ export default function Rules() {
     rules.reload();
   });
   const remove = r => {
-    if (!confirmDanger(`删除转发规则 ${r.name}？已建立的连接会被断开。`)) return;
+    if (!confirmDanger(`Delete the rule ${r.name}? Its open connections are closed.`)) return;
     action.run(async () => { await api.del(`/rules/${r.id}`); rules.reload(); });
   };
 
-  return html`<${Page} title="转发规则" subtitle="把本机端口的 TCP 连接或 UDP 数据报转发到其它地址。"
-    actions=${html`<button class="btn btn-primary" onClick=${() => setEditing({})}>添加规则</button>`}>
+  return html`<${Page} title="Port forwards" subtitle="Forward TCP connections or UDP datagrams on a local port to another address."
+    actions=${html`<button class="button button-primary" onClick=${() => setEditing({})}>Add rule</button>`}>
     <${Notice} error=${rules.error || action.error} />
-    ${rules.data === undefined ? (rules.error ? null : html`<${Loading} />`) : !rules.data.length ? html`<${Empty}>还没有转发规则。<//>` : html`
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th>名称</th><th>转发</th><th>状态</th><th class="num">连接</th><th class="num">流量 入 / 出</th><th class="actions"></th></tr></thead>
+    ${rules.data === undefined ? (rules.error ? null : html`<${Loading} />`) : !rules.data.length ? html`<${Empty}>No rules yet.<//>` : html`
+      <${Table}>
+        <thead><tr><th>Name</th><th>Forward</th><th>Status</th><th class="num">Connections</th><th class="num">Traffic in / out</th><th class="actions"></th></tr></thead>
         <tbody>${rules.data.map(r => html`<tr key=${r.id}>
           <td><div class="cell-main">${r.name}</div><div class="cell-sub">${PROTOCOLS[r.protocol]}</div></td>
           <td><span class="route mono"><span>${r.listen}</span><span class="arrow">→</span><span>${r.target}</span></span>
             ${r.enabled && r.stats.error ? html`<div class="error-text">${r.stats.error}</div>` : null}</td>
           <td><${State} rule=${r} /></td>
-          <td class="num">${r.stats.running ? html`${r.stats.active}<div class="cell-sub">共 ${r.stats.total}</div>` : '—'}</td>
+          <td class="num">${r.stats.running ? html`${r.stats.active}<div class="cell-sub">${r.stats.total} total</div>` : '—'}</td>
           <td class="num nowrap">${r.stats.running ? `${bytes(r.stats.bytes_in)} / ${bytes(r.stats.bytes_out)}` : '—'}</td>
-          <td class="actions"><span class="btn-group">
-            <button class="btn btn-sm" disabled=${action.busy} onClick=${() => toggle(r)}>${r.enabled ? '停用' : '启用'}</button>
-            <button class="btn btn-sm" onClick=${() => setEditing(r)}>编辑</button>
-            <button class="btn btn-sm btn-danger" disabled=${action.busy} onClick=${() => remove(r)}>删除</button>
+          <td class="actions"><span class="button-row">
+            <button class="button button-small" disabled=${action.busy} onClick=${() => toggle(r)}>${r.enabled ? 'Disable' : 'Enable'}</button>
+            <button class="button button-small" onClick=${() => setEditing(r)}>Edit</button>
+            <button class="button button-small button-danger" disabled=${action.busy} onClick=${() => remove(r)}>Delete</button>
           </span></td>
         </tr>`)}</tbody>
-      </table></div>`}
+      <//>`}
     ${editing ? html`<${RuleForm} rule=${editing} onClose=${() => setEditing(null)} onSaved=${() => { setEditing(null); rules.reload(); }} />` : null}
   <//>`;
 }
@@ -69,28 +69,28 @@ function RuleForm({ rule, onClose, onSaved }) {
       onSaved();
     });
   };
-  return html`<${Modal} title=${isNew ? '添加转发规则' : `编辑 ${rule.name}`} onClose=${onClose} footer=${html`
+  return html`<${Modal} title=${isNew ? 'Add rule' : `Edit ${rule.name}`} onClose=${onClose} footer=${html`
     <span class="spacer"></span>
-    <button class="btn" type="button" onClick=${onClose}>取消</button>
-    <button class="btn btn-primary" type="submit" form="rule-form" disabled=${busy}>${isNew ? '添加' : '保存'}</button>`}>
+    <button class="button" type="button" onClick=${onClose}>Cancel</button>
+    <button class="button button-primary" type="submit" form="rule-form" disabled=${busy}>${isNew ? 'Add' : 'Save'}</button>`}>
     <form id="rule-form" class="form" onSubmit=${submit}>
       <${Notice} error=${error} />
-      <${Field} label="名称" required>
+      <${Field} label="Name" required>
         <input class="input" required value=${r.name} onInput=${e => set({ name: e.currentTarget.value })} placeholder="nas-ssh" autofocus />
       <//>
-      <fieldset class="field"><span class="field-label">协议</span><div class="choices">
-        ${Object.entries(PROTOCOLS).map(([k, label]) => html`<label class="check" key=${k}>
+      <fieldset class="field"><span class="field-label">Protocols</span><div class="choices">
+        ${Object.entries(PROTOCOLS).map(([k, label]) => html`<label class="field-check" key=${k}>
           <input type="radio" name="protocol" checked=${r.protocol === k} onChange=${() => set({ protocol: k })} />${label}</label>`)}
       </div></fieldset>
       <div class="form-grid">
-        <${Field} label="监听地址" required hint="端口，或 地址:端口；只写端口时监听所有网卡">
+        <${Field} label="Listen on" required hint="A port, or address:port; a port alone listens on every interface">
           <input class="input mono" required value=${r.listen} onInput=${e => set({ listen: e.currentTarget.value })} placeholder="2222" />
         <//>
-        <${Field} label="目标地址" required hint="主机:端口">
+        <${Field} label="Target" required hint="host:port">
           <input class="input mono" required value=${r.target} onInput=${e => set({ target: e.currentTarget.value })} placeholder="192.168.1.10:22" />
         <//>
       </div>
-      <label class="check"><input type="checkbox" checked=${r.enabled} onChange=${e => set({ enabled: e.currentTarget.checked })} />保存后立即启用</label>
+      <label class="field-check"><input type="checkbox" checked=${r.enabled} onChange=${e => set({ enabled: e.currentTarget.checked })} />Enable on save</label>
     </form>
   <//>`;
 }
