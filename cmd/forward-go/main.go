@@ -31,23 +31,23 @@ Flags:
 func main() {
 	flag.Usage = func() { fmt.Fprint(flag.CommandLine.Output(), usage); flag.PrintDefaults() }
 	listen := flag.String("listen", "127.0.0.1:8080", "address for the UI and API")
-	dbPath := flag.String("db", defaultDatabasePath(), "SQLite database path")
+	configPath := flag.String("config", defaultConfigPath(), "YAML configuration path")
 	flag.Parse()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	slog.SetDefault(logger)
-	if err := run(*listen, *dbPath, logger); err != nil {
+	if err := run(*listen, *configPath, logger); err != nil {
 		logger.Error("fatal", "err", err)
 		os.Exit(1)
 	}
 }
 
-func run(listen, dbPath string, logger *slog.Logger) error {
+func run(listen, configPath string, logger *slog.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0o700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o700); err != nil {
 		return err
 	}
-	st, err := store.Open(ctx, dbPath)
+	st, err := store.Open(ctx, configPath)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func run(listen, dbPath string, logger *slog.Logger) error {
 	srv := &http.Server{Addr: listen, Handler: fwd.Standalone(password), ReadHeaderTimeout: 10 * time.Second}
 	errc := make(chan error, 1)
 	go func() { errc <- srv.ListenAndServe() }()
-	logger.Info("forward-go listening", "url", "http://"+listen, "db", dbPath)
+	logger.Info("forward-go listening", "url", "http://"+listen, "config", configPath)
 	select {
 	case err := <-errc:
 		return err
@@ -85,10 +85,10 @@ func isLoopback(address string) bool {
 	return host == "localhost" || ip != nil && ip.IsLoopback()
 }
 
-func defaultDatabasePath() string {
+func defaultConfigPath() string {
 	dir, err := os.UserConfigDir()
 	if err != nil {
-		return "forward.db"
+		return "forward.yaml"
 	}
-	return filepath.Join(dir, "forward-go", "forward.db")
+	return filepath.Join(dir, "forward-go", "forward.yaml")
 }

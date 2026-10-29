@@ -19,16 +19,16 @@ import (
 
 // Rule forwards one local port to a target.
 type Rule struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	Protocol string `json:"protocol"` // tcp | udp
+	ID       int64  `json:"id" yaml:"id"`
+	Name     string `json:"name" yaml:"name"`
+	Protocol string `json:"protocol" yaml:"protocol"` // tcp | udp
 	// Listen is the local address, "host:port"; an empty host listens on
 	// every interface. A bare port is accepted and normalized to ":port".
-	Listen    string    `json:"listen"`
-	Target    string    `json:"target"` // "host:port"
-	Enabled   bool      `json:"enabled"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Listen    string    `json:"listen" yaml:"listen"`
+	Target    string    `json:"target" yaml:"target"` // "host:port"
+	Enabled   bool      `json:"enabled" yaml:"enabled"`
+	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
 // ErrInvalid marks a rule that fails validation.

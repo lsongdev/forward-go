@@ -16,7 +16,7 @@ import (
 	"github.com/lsongdev/forward-go/store"
 )
 
-// Store persists rules; store.SQLite implements it.
+// Store persists rules; store.YAML implements it.
 type Store interface {
 	List(ctx context.Context) ([]forward.Rule, error)
 	Get(ctx context.Context, id int64) (forward.Rule, error)

@@ -3,7 +3,6 @@ package api_test
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"io"
 	"net"
@@ -18,28 +17,23 @@ import (
 )
 
 type env struct {
-	t   *testing.T
-	db  *sql.DB
-	svc *api.Service
-	fwd *forward.Forwarder
-	h   http.Handler
+	t    *testing.T
+	path string
+	svc  *api.Service
+	fwd  *forward.Forwarder
+	h    http.Handler
 }
 
 func newEnv(t *testing.T) *env {
 	t.Helper()
-	db, err := sql.Open("sqlite", filepath.Join(t.TempDir(), "panel.db"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { db.Close() })
-	e := &env{t: t, db: db}
+	e := &env{t: t, path: filepath.Join(t.TempDir(), "forward.yaml")}
 	e.start()
 	return e
 }
 
-// start assembles the service on the env's database, as after a restart.
+// start assembles the service on the env's configuration, as after a restart.
 func (e *env) start() {
-	st, err := store.New(context.Background(), e.db)
+	st, err := store.Open(context.Background(), e.path)
 	if err != nil {
 		e.t.Fatal(err)
 	}

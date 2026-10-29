@@ -1,5 +1,5 @@
 // Package web assembles the port forwarder as a panel module: the
-// forwarder, its SQLite store, the JSON API and the browser UI (native ES
+// forwarder, its YAML store, the JSON API and the browser UI (native ES
 // modules in ui/, no build step).
 //
 // A Forward value satisfies the panel module contract without depending on
@@ -10,7 +10,6 @@ package web
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"io/fs"
 	"log/slog"
@@ -43,13 +42,12 @@ type Options struct {
 type Forward struct {
 	Service   *api.Service
 	forwarder *forward.Forwarder
-	store     *store.SQLite
+	store     *store.YAML
 }
 
-// New migrates the forward_ tables in db (shareable with other modules),
-// and starts the enabled rules. The caller owns db.
-func New(ctx context.Context, db *sql.DB, opts Options) (*Forward, error) {
-	st, err := store.New(ctx, db)
+// New opens the YAML configuration at path and starts enabled rules.
+func New(ctx context.Context, path string, opts Options) (*Forward, error) {
+	st, err := store.Open(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +55,7 @@ func New(ctx context.Context, db *sql.DB, opts Options) (*Forward, error) {
 }
 
 // NewWithStore assembles the forwarder on st, which it closes on Close.
-func NewWithStore(ctx context.Context, st *store.SQLite, opts Options) (*Forward, error) {
+func NewWithStore(ctx context.Context, st *store.YAML, opts Options) (*Forward, error) {
 	if opts.Forward.Logger == nil {
 		opts.Forward.Logger = opts.Logger
 	}
@@ -76,7 +74,7 @@ func (f *Forward) Handler() http.Handler { return f.Service.Handler() }
 // Assets returns the browser UI; manifest.json is at its root.
 func (f *Forward) Assets() fs.FS { return UI }
 
-// Close stops every rule. A database passed to New stays open.
+// Close stops every rule. Configuration changes are persisted immediately.
 func (f *Forward) Close() error {
 	f.forwarder.Close()
 	return f.store.Close()

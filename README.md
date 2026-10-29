@@ -13,11 +13,11 @@ and its traffic.
 - A rule whose port is taken is refused when you add or enable it, and
   reported (not fatal) when it cannot start at launch.
 
-One Go binary; rules live in SQLite. The UI is Preact + HTM loaded as native
+One Go binary; rules live in a YAML configuration file. The UI is Preact + HTM loaded as native
 ES modules, with no build step.
 
 ```sh
-go run ./cmd/forward-go -listen 127.0.0.1:8080   # -db defaults to the user config dir
+go run ./cmd/forward-go -listen 127.0.0.1:8080   # -config defaults to the user config dir
 ```
 
 Set `FORWARD_GO_PASSWORD` to require HTTP basic authentication.
@@ -29,7 +29,7 @@ forward-go follows the panel module contract (see OhMyServer's
 modules:
 
 ```go
-fwd, err := web.New(ctx, db, web.Options{}) // tables are prefixed forward_
+fwd, err := web.New(ctx, "forward.yaml", web.Options{})
 fwd.Handler()                               // JSON API, relative routes
 fwd.Assets()                                // UI with manifest.json
 ```
@@ -45,3 +45,23 @@ Responses are `{"data": …}`; errors are `{"error": {"code", "message"}}`.
 | GET/PUT/DELETE | `/rules/{id}` | a failed rebind restores the previous rule |
 | POST | `/rules/{id}/enable`, `/rules/{id}/disable` | |
 | GET | `/summary` | counts for an overview |
+
+## Configuration
+
+Use `-config /path/to/forward.yaml` to select the file (default:
+`forward-go/forward.yaml` under the user config directory). Changes from the UI
+are saved immediately. Edit the file while the service is stopped, then restart.
+Existing SQLite databases are not imported automatically.
+
+```yaml
+rules:
+  - id: 1
+    name: nas-ssh
+    protocol: tcp
+    listen: ":2222"
+    target: "192.168.1.10:22"
+    enabled: true
+```
+
+IDs may be omitted for new entries; the service assigns them on load. The file
+also records timestamps and `next_id` when saved through the API.

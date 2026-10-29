@@ -3,6 +3,8 @@
 import { createMount } from './lib/mount.js';
 
 const routes = [
+  { path: '/rules/new', load: () => import('./pages/rule-form.js') },
+  { path: '/rules/:id/edit', load: () => import('./pages/rule-form.js') },
   { path: '/', load: () => import('./pages/rules.js') },
 ];
 
