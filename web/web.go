@@ -1,16 +1,18 @@
 // Package web assembles the port forwarder as a panel module: the
-// forwarder, its YAML store, the JSON API and the browser UI (native ES
-// modules in ui/, no build step).
+// forwarder, a rule store (a YAML file of its own, or one a panel
+// provides), the JSON API and the browser UI (native ES modules in ui/, no
+// build step).
 //
 // A Forward value satisfies the panel module contract without depending on
 // any panel: Handler serves the API with relative routes and Assets holds
 // the UI with manifest.json at its root. The standalone command and a panel
-// build it the same way, through New.
+// build it the same way, through New or NewWithStore.
 package web
 
 import (
 	"context"
 	"embed"
+	"io"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -42,7 +44,7 @@ type Options struct {
 type Forward struct {
 	Service   *api.Service
 	forwarder *forward.Forwarder
-	store     *store.YAML
+	store     api.Store
 }
 
 // New opens the YAML configuration at path and starts enabled rules.
@@ -54,8 +56,10 @@ func New(ctx context.Context, path string, opts Options) (*Forward, error) {
 	return NewWithStore(ctx, st, opts)
 }
 
-// NewWithStore assembles the forwarder on st, which it closes on Close.
-func NewWithStore(ctx context.Context, st *store.YAML, opts Options) (*Forward, error) {
+// NewWithStore assembles the forwarder on st, such as a panel's database,
+// and closes it on Close if it is an io.Closer. st reports missing rules
+// and duplicates with store.ErrNotFound and store.ErrConflict.
+func NewWithStore(ctx context.Context, st api.Store, opts Options) (*Forward, error) {
 	if opts.Forward.Logger == nil {
 		opts.Forward.Logger = opts.Logger
 	}
@@ -77,5 +81,8 @@ func (f *Forward) Assets() fs.FS { return UI }
 // Close stops every rule. Configuration changes are persisted immediately.
 func (f *Forward) Close() error {
 	f.forwarder.Close()
-	return f.store.Close()
+	if closer, ok := f.store.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
 }

@@ -34,6 +34,12 @@ fwd.Handler()                               // JSON API, relative routes
 fwd.Assets()                                // UI with manifest.json
 ```
 
+A panel that keeps module state in its own database passes a rule store
+instead of the YAML file: `web.NewWithStore(ctx, st, opts)` takes any
+`api.Store` (List, Get, Create, Update, Delete), reporting missing rules
+and duplicates with `store.ErrNotFound` and `store.ErrConflict`. OhMyServer
+does this, so the YAML file is only used when forward-go runs on its own.
+
 ## API
 
 Responses are `{"data": …}`; errors are `{"error": {"code", "message"}}`.

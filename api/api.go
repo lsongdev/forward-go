@@ -16,7 +16,9 @@ import (
 	"github.com/lsongdev/forward-go/store"
 )
 
-// Store persists rules; store.YAML implements it.
+// Store persists rules; store.YAML implements it, and a panel may provide
+// its own. Missing rules are store.ErrNotFound, and a duplicate name or
+// listen address store.ErrConflict.
 type Store interface {
 	List(ctx context.Context) ([]forward.Rule, error)
 	Get(ctx context.Context, id int64) (forward.Rule, error)
