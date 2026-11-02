@@ -41,7 +41,7 @@ function RuleForm({ rule }) {
         ${Object.entries(PROTOCOLS).map(([k, label]) => html`<label class="field-check" key=${k}>
           <input type="radio" name="protocol" checked=${r.protocol === k} onChange=${() => set({ protocol: k })} />${label}</label>`)}
       </div></fieldset>
-      <div class="form-grid">
+      <div class="forward-rule-fields">
         <${Field} label="Listen on" required hint="A port, or address:port; a port alone listens on every interface">
           <input class="input mono" required value=${r.listen} onInput=${e => set({ listen: e.currentTarget.value })} placeholder="2222" />
         <//>
