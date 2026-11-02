@@ -40,7 +40,7 @@ export default function Rules() {
           <td><${State} rule=${r} /></td>
           <td class="num">${r.stats.running ? html`${r.stats.active}<div class="cell-sub">${r.stats.total} total</div>` : '—'}</td>
           <td class="num nowrap">${r.stats.running ? `${bytes(r.stats.bytes_in)} / ${bytes(r.stats.bytes_out)}` : '—'}</td>
-          <td class="actions"><span class="button-row">
+          <td class="actions"><span class="row-actions">
             <button class="button button-small" disabled=${action.busy} onClick=${() => toggle(r)}>${r.enabled ? 'Disable' : 'Enable'}</button>
             <a class="button button-small" href=${href(`/rules/${r.id}/edit`)}>Edit</a>
             <button class="button button-small button-danger" disabled=${action.busy} onClick=${() => remove(r)}>Delete</button>

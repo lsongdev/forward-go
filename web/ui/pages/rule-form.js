@@ -50,7 +50,7 @@ function RuleForm({ rule }) {
         <//>
       </div>
       <label class="field-check"><input type="checkbox" checked=${r.enabled} onChange=${e => set({ enabled: e.currentTarget.checked })} />Enable on save</label>
-      <div class="button-row">
+      <div class="button-actions">
         <button class="button button-primary" type="submit" disabled=${busy}>${busy ? 'Saving…' : isNew ? 'Add' : 'Save'}</button>
         <a class="button" href=${href('/')}>Cancel</a>
       </div>
