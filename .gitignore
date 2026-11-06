@@ -1,3 +1,6 @@
 /forward-go
 *.db
 *.db-*
+
+# browser dependencies, installed by make deps
+node_modules/

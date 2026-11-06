@@ -1,9 +1,9 @@
-import { html } from '@lsongdev/panel/html.js';
-import { useAction, useResource } from '@lsongdev/panel/hooks.js';
+import { html } from '../lib/html.js';
+import { useAction, useResource } from '../lib/hooks.js';
 import { PageHeader, Alert, Loading, Empty, Table } from '@lsongdev/scripts/react/components/index.js';
-import { Status } from '@lsongdev/panel/ui.js';
-import { usePanel } from '@lsongdev/panel/panel.js';
-import { bytes } from '@lsongdev/panel/format.js';
+import { Status } from '../lib/ui.js';
+import { usePanel } from '../lib/panel.js';
+import { bytes } from '../lib/format.js';
 
 const PROTOCOLS = { tcp: 'TCP', udp: 'UDP' };
 
