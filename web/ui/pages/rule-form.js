@@ -1,7 +1,7 @@
-import { html, useState } from '../lib/html.js';
-import { useAction, useResource } from '../lib/hooks.js';
-import { Page, Notice, Loading, Field } from '../lib/ui.js';
-import { usePanel } from '../lib/panel.js';
+import { html, useState } from '@lsongdev/panel/html.js';
+import { useAction, useResource } from '@lsongdev/panel/hooks.js';
+import { Page, Notice, Loading, Field } from '@lsongdev/panel/ui.js';
+import { usePanel } from '@lsongdev/panel/panel.js';
 
 const PROTOCOLS = { tcp: 'TCP', udp: 'UDP' };
 

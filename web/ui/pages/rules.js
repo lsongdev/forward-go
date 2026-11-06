@@ -1,8 +1,8 @@
-import { html } from '../lib/html.js';
-import { useAction, useResource } from '../lib/hooks.js';
-import { Page, Notice, Loading, Empty, Status, confirmDanger, Table } from '../lib/ui.js';
-import { usePanel } from '../lib/panel.js';
-import { bytes } from '../lib/format.js';
+import { html } from '@lsongdev/panel/html.js';
+import { useAction, useResource } from '@lsongdev/panel/hooks.js';
+import { Page, Notice, Loading, Empty, Status, confirmDanger, Table } from '@lsongdev/panel/ui.js';
+import { usePanel } from '@lsongdev/panel/panel.js';
+import { bytes } from '@lsongdev/panel/format.js';
 
 const PROTOCOLS = { tcp: 'TCP', udp: 'UDP' };
 
