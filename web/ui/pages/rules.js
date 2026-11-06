@@ -1,6 +1,7 @@
 import { html } from '@lsongdev/panel/html.js';
 import { useAction, useResource } from '@lsongdev/panel/hooks.js';
-import { Page, Notice, Loading, Empty, Status, confirmDanger, Table } from '@lsongdev/panel/ui.js';
+import { PageHeader, Alert, Loading, Empty, Table } from '@lsongdev/scripts/react/components/index.js';
+import { Status } from '@lsongdev/panel/ui.js';
 import { usePanel } from '@lsongdev/panel/panel.js';
 import { bytes } from '@lsongdev/panel/format.js';
 
@@ -23,13 +24,13 @@ export default function Rules() {
     rules.reload();
   });
   const remove = r => {
-    if (!confirmDanger(`Delete the rule ${r.name}? Its open connections are closed.`)) return;
+    if (!window.confirm(`Delete the rule ${r.name}? Its open connections are closed.`)) return;
     action.run(async () => { await api.del(`/rules/${r.id}`); rules.reload(); });
   };
 
-  return html`<${Page} title="Port forwards" subtitle="Forward TCP connections or UDP datagrams on a local port to another address."
-    actions=${html`<a class="button button-primary" href=${href('/rules/new')}>Add rule</a>`}>
-    <${Notice} error=${rules.error || action.error} />
+  return html`<${PageHeader} title="Port forwards" subtitle="Forward TCP connections or UDP datagrams on a local port to another address."
+    actions=${html`<a class="button button-primary" href=${href('/rules/new')}>Add rule</a>`} />
+    <${Alert} error=${rules.error || action.error} />
     ${rules.data === undefined ? (rules.error ? null : html`<${Loading} />`) : !rules.data.length ? html`<${Empty}>No rules yet.<//>` : html`
       <${Table}>
         <thead><tr><th>Name</th><th>Forward</th><th>Status</th><th class="num">Connections</th><th class="num">Traffic in / out</th><th class="actions"></th></tr></thead>
@@ -46,6 +47,5 @@ export default function Rules() {
             <button class="button button-small button-danger" disabled=${action.busy} onClick=${() => remove(r)}>Delete</button>
           </span></td>
         </tr>`)}</tbody>
-      <//>`}
-  <//>`;
+      <//>`}`;
 }

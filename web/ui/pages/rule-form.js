@@ -1,6 +1,6 @@
 import { html, useState } from '@lsongdev/panel/html.js';
 import { useAction, useResource } from '@lsongdev/panel/hooks.js';
-import { Page, Notice, Loading, Field } from '@lsongdev/panel/ui.js';
+import { PageHeader, Alert, Loading, Field } from '@lsongdev/scripts/react/components/index.js';
 import { usePanel } from '@lsongdev/panel/panel.js';
 
 const PROTOCOLS = { tcp: 'TCP', udp: 'UDP' };
@@ -10,7 +10,7 @@ export default function RulePage() {
   const id = params.id;
   const resource = useResource(signal => id ? api.get(`/rules/${id}`, { signal }) : Promise.resolve({}), [id]);
   if (resource.loading) return html`<${Loading} />`;
-  if (resource.error) return html`<${Notice} error=${resource.error} />`;
+  if (resource.error) return html`<${Alert} error=${resource.error} />`;
   return html`<${RuleForm} key=${id || 'new'} rule=${resource.data} />`;
 }
 
@@ -31,9 +31,9 @@ function RuleForm({ rule }) {
       navigate('/');
     });
   };
-  return html`<${Page} title=${isNew ? 'Add rule' : `Edit ${rule.name}`} back=${{ href: href('/'), label: 'Port forwards' }}>
+  return html`<${PageHeader} title=${isNew ? 'Add rule' : `Edit ${rule.name}`} back=${{ href: href('/'), label: 'Port forwards' }} />
     <form id="rule-form" class="form" onSubmit=${submit}>
-      <${Notice} error=${error} />
+      <${Alert} error=${error} />
       <${Field} label="Name" required>
         <input class="input" required value=${r.name} onInput=${e => set({ name: e.currentTarget.value })} placeholder="nas-ssh" autofocus />
       <//>
@@ -54,6 +54,5 @@ function RuleForm({ rule }) {
         <button class="button button-primary" type="submit" disabled=${busy}>${busy ? 'Saving…' : isNew ? 'Add' : 'Save'}</button>
         <a class="button" href=${href('/')}>Cancel</a>
       </div>
-    </form>
-  <//>`;
+    </form>`;
 }
